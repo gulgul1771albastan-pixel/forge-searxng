@@ -1,0 +1,16 @@
+use_default_settings: true
+
+general:
+  instance_name: "Forge Search"
+
+server:
+  secret_key: "change-this-to-any-long-random-text"
+  limiter: false
+  image_proxy: true
+
+search:
+  safe_search: 0
+  autocomplete: "duckduckgo"
+  formats:
+    - html
+    - json
