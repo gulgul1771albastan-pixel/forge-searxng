@@ -6,8 +6,9 @@
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    min-height: 60vh;
+    min-height: 70vh;
     padding: 2rem 1rem;
+    width: 100%;
   }
   .forge-brand {
     font-size: 4.5rem;
@@ -21,6 +22,25 @@
   html.theme-dark .forge-brand,
   html.theme-black .forge-brand {
     color: #88c0d0;
+  }
+
+  /* Wide centered search bar on home */
+  .forge-home #search,
+  .forge-home #search_header,
+  .forge-home #search_view,
+  .forge-home .search_box {
+    width: 100% !important;
+    max-width: 720px !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
+  }
+  .forge-home .search_box {
+    display: flex !important;
+    align-items: center !important;
+  }
+  .forge-home #q {
+    width: 100% !important;
+    flex: 1 1 auto !important;
   }
 </style>
 <div class="forge-home">
