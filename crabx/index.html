@@ -1,10 +1,21 @@
 {% extends "simple/base.html" %}
-{% from 'simple/icons.html' import icon_big %}
 {% block content %}
+<style>
+  /* Show real text instead of SearXNG logo image */
+  .index .title h1 {
+    background-image: none !important;
+    text-indent: 0 !important;
+    width: auto !important;
+    height: auto !important;
+    font-size: 2.75rem !important;
+    font-weight: 600 !important;
+    letter-spacing: 0.06em !important;
+    color: #5e81ac !important; /* Nord frost blue */
+    margin: 0 0 1.5rem 0 !important;
+  }
+</style>
 <div class="index">
-    <div class="title" style="display:block !important; visibility:visible !important; opacity:1 !important; margin-bottom: 1.25rem;">
-        <h1 style="font-size: 2.75rem; font-weight: 600; letter-spacing: 0.04em; color: inherit;">FORGE SEARCH</h1>
-    </div>
-    {% include 'simple/simple_search.html' %}
+  <div class="title"><h1>FORGE SEARCH</h1></div>
+  {% include 'simple/simple_search.html' %}
 </div>
 {% endblock %}
