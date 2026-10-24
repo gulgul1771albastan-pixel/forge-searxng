@@ -1,20 +1,135 @@
-<form id="search" method="{{ method or 'POST' }}" action="{{ url_for('search') }}" role="search">
+<form id="search" method="GET" action="{{ url_for('search') }}" role="search">
   <div id="search_header">
     <div id="search_view">
       <div class="search_box">
-        <input id="q" name="q" type="text" placeholder="{{ _('Search for...') }}" autocomplete="off" autocapitalize="none" spellcheck="false" autocorrect="off" dir="auto" value="{{ q or '' }}">
-        <button id="clear_search" type="reset" aria-label="{{ _('clear') }}"><span class="hide_if_nojs">{{ icon_big('close') }}</span><span class="show_if_nojs">{{ _('clear') }}</span></button>
-        <button id="send_search" type="submit" aria-label="{{ _('search') }}"><span class="hide_if_nojs">{{ icon_big('search') }}</span><span class="show_if_nojs">{{ _('search') }}</span></button>
-        <div class="autocomplete hide_if_nojs"><ul></ul></div>
+        <input id="q" name="q" type="text" placeholder="{{ _('Search for...') }}"
+               autocomplete="off" autocapitalize="none" spellcheck="false" autocorrect="off"
+               dir="auto" value="{{ q or '' }}">
+        <button id="clear_search" type="reset" aria-label="{{ _('clear') }}" class="empty"><span class="hide_if_nojs"><svg viewBox="0 0 512 512" class="ionicon sxng-icon-set-big" aria-hidden="true"><path d="M368 368 144 144M368 144 144 368" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="32px"></path></svg></span><span class="show_if_nojs">{{ _('clear') }}</span></button>
+        <button id="send_search" type="submit" aria-label="{{ _('search') }}"><span class="hide_if_nojs"><svg viewBox="0 0 512 512" class="ionicon sxng-icon-set-big" aria-hidden="true"><path d="M221.09 64a157.09 157.09 0 10157.09 157.09A157.1 157.1 0 00221.09 64z" fill="none" stroke="currentColor" stroke-miterlimit="10" stroke-width="32"></path><path d="M338.29 338.29L448 448" fill="none" stroke="currentColor" stroke-linecap="round" stroke-miterlimit="10" stroke-width="32"></path></svg></span><span class="show_if_nojs">{{ _('search') }}</span></button>
+        <button id="voice_search" type="button" aria-label="Voice search" title="Voice search">
+          <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path>
+            <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
+            <line x1="12" y1="19" x2="12" y2="23"></line>
+            <line x1="8" y1="23" x2="16" y2="23"></line>
+          </svg>
+        </button>
       </div>
     </div>
   </div>
-  {% for category in selected_categories %}
-  <input type="hidden" name="category_{{ category }}" value="1" >
-  {% endfor %}
-  <input type="hidden" name="language" value="{{ current_language }}" >
-  <input type="hidden" name="time_range" value="{{ time_range }}" >
-  <input type="hidden" name="safesearch" value="{{ safesearch }}" >
-  <input type="hidden" name="theme" value="{{ theme }}" >
-  {% if timeout_limit %}<input type="hidden" name="timeout_limit" value="{{ timeout_limit|e }}" >{% endif %}
+  {% include 'simple/categories.html' %}
 </form>
+
+<div id="voice_freq" aria-hidden="true" style="display:none;position:fixed;left:50%;bottom:24px;transform:translateX(-50%);width:min(320px,90vw);height:40px;align-items:flex-end;justify-content:center;gap:3px;z-index:9999;"></div>
+
+<style>
+  #voice_search {
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    padding: 0 6px;
+    display: flex;
+    align-items: center;
+    color: inherit;
+    opacity: 0.75;
+  }
+  #voice_search:hover { opacity: 1; }
+  #voice_search.listening { color: #5e81ac; opacity: 1; }
+  #voice_freq div {
+    width: 4px;
+    background: #5e81ac;
+    border-radius: 2px;
+    height: 6px;
+    transition: height 0.08s ease;
+  }
+</style>
+
+<script>
+(function () {
+  const form = document.getElementById('search');
+  const input = document.getElementById('q');
+  const mic = document.getElementById('voice_search');
+  const barWrap = document.getElementById('voice_freq');
+  if (!form || !input || !mic || !barWrap) return;
+  if (!('webkitSpeechRecognition' in window || 'SpeechRecognition' in window)) {
+    mic.style.display = 'none';
+    return;
+  }
+
+  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+  const rec = new SpeechRecognition();
+  rec.continuous = true;
+  rec.interimResults = true;
+
+  for (let i = 0; i < 24; i++) {
+    const b = document.createElement('div');
+    barWrap.appendChild(b);
+  }
+  const bars = barWrap.children;
+
+  let silenceTimer = null;
+  let audioCtx, analyser, data, raf, mediaStream;
+
+  function startViz(stream) {
+    mediaStream = stream;
+    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    const src = audioCtx.createMediaStreamSource(stream);
+    analyser = audioCtx.createAnalyser();
+    analyser.fftSize = 64;
+    src.connect(analyser);
+    data = new Uint8Array(analyser.frequencyBinCount);
+    barWrap.style.display = 'flex';
+    (function tick() {
+      analyser.getByteFrequencyData(data);
+      for (let i = 0; i < bars.length; i++) {
+        const v = data[i % data.length] / 255;
+        bars[i].style.height = Math.max(4, v * 40) + 'px';
+      }
+      raf = requestAnimationFrame(tick);
+    })();
+  }
+
+  function stopViz() {
+    cancelAnimationFrame(raf);
+    barWrap.style.display = 'none';
+    mic.classList.remove('listening');
+    if (mediaStream) {
+      mediaStream.getTracks().forEach(function (t) { t.stop(); });
+      mediaStream = null;
+    }
+    if (audioCtx) {
+      audioCtx.close();
+      audioCtx = null;
+    }
+  }
+
+  mic.addEventListener('click', async function () {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      mic.classList.add('listening');
+      startViz(stream);
+      rec.start();
+    } catch (e) {
+      alert('Microphone permission is required for voice search.');
+    }
+  });
+
+  rec.onresult = function (e) {
+    var text = '';
+    for (var i = 0; i < e.results.length; i++) {
+      text += e.results[i][0].transcript;
+    }
+    input.value = text.trim();
+    clearTimeout(silenceTimer);
+    silenceTimer = setTimeout(function () {
+      try { rec.stop(); } catch (err) {}
+      stopViz();
+      if (input.value.trim()) form.submit();
+    }, 3000);
+  };
+
+  rec.onerror = function () { stopViz(); };
+  rec.onend = function () { /* silence timer handles submit */ };
+})();
+</script>
