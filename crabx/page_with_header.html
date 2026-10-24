@@ -1,7 +1,7 @@
 {%- set body_class = "page_with_header" -%}
 {%- extends "simple/base.html" -%}
 {%- block header -%}
-  <a href="{{ url_for('index') }}">{{- '' -}}
-    <img class="logo" src="{{ url_for('static', filename='img/searxng.png') }}" alt="SearXNG">{{- '' -}}
-  </a>{{- '' -}}
+  <a href="{{ url_for('index') }}" class="logo" style="font-size:1.25rem;font-weight:600;letter-spacing:0.04em;text-decoration:none;color:inherit;">
+    FORGE SEARCH
+  </a>
 {%- endblock -%}
