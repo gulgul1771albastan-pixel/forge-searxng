@@ -18,7 +18,9 @@
       </div>
     </div>
   </div>
+  {% if q %}
   {% include 'simple/categories.html' %}
+  {% endif %}
 </form>
 
 <div id="voice_freq" aria-hidden="true" style="display:none;position:fixed;left:50%;bottom:24px;transform:translateX(-50%);width:min(320px,90vw);height:40px;align-items:flex-end;justify-content:center;gap:3px;z-index:9999;"></div>
@@ -63,8 +65,7 @@
   rec.interimResults = true;
 
   for (let i = 0; i < 24; i++) {
-    const b = document.createElement('div');
-    barWrap.appendChild(b);
+    barWrap.appendChild(document.createElement('div'));
   }
   const bars = barWrap.children;
 
@@ -130,6 +131,5 @@
   };
 
   rec.onerror = function () { stopViz(); };
-  rec.onend = function () { /* silence timer handles submit */ };
 })();
 </script>
