@@ -1,22 +1,30 @@
 {% extends "simple/base.html" %}
 {% block content %}
 <style>
-  .index .title h1 {
-    background: none !important;
-    background-image: none !important;
-    text-indent: 0 !important;
-    overflow: visible !important;
-    width: auto !important;
-    height: auto !important;
-    font-size: 2.75rem !important;
-    font-weight: 600 !important;
-    letter-spacing: 0.06em !important;
-    color: #5e81ac !important;
-    margin: 0 0 1.5rem 0 !important;
+  .forge-home {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 60vh;
+    padding: 2rem 1rem;
+  }
+  .forge-brand {
+    font-size: 2.75rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    color: #5e81ac;
+    margin: 0 0 1.75rem 0;
+    text-align: center;
+    font-family: system-ui, -apple-system, Segoe UI, sans-serif;
+  }
+  html.theme-dark .forge-brand,
+  html.theme-black .forge-brand {
+    color: #88c0d0;
   }
 </style>
-<div class="index">
-  <div class="title"><h1>FORGE SEARCH</h1></div>
+<div class="forge-home">
+  <div class="forge-brand">FORGE SEARCH</div>
   {% include 'simple/simple_search.html' %}
 </div>
 {% endblock %}
