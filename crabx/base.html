@@ -27,6 +27,21 @@
   <link rel="icon" href="{{ url_for('static', filename='img/favicon.svg') }}" type="image/svg+xml">
   <link rel="apple-touch-icon" href="{{ url_for('static', filename='img/favicon.png') }}">
 </head>
+  <style>
+  /* Hide right sidebar: Info / Response time / Download */
+  #sidebar,
+  #sides,
+  .sidebar,
+  #links_on_right,
+  .infobox,
+  #info_wrapper {
+    display: none !important;
+  }
+  #results, .results {
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+</style>
 <body class="{{ endpoint }}_endpoint" >
   <main id="main_{{  self._TemplateReference__context.name|replace("simple/", "")|replace(".html", "") }}" class="{{body_class}}">
     {% if errors %}
