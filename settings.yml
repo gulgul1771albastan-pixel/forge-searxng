@@ -14,3 +14,9 @@ search:
   formats:
     - html
     - json
+
+ui:
+  default_theme: simple
+  center_alignment: false
+  theme_args:
+    simple_style: light
